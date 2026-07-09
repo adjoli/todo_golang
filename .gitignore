@@ -1,0 +1,16 @@
+# Binários
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Banco de dados
+data/tasks.db
+
+# IDE
+.vscode/
+.idea/
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
