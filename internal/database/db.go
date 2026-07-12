@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	dbDir  = "data"
-	dbFile = "data/tasks.db"
+	dbDir = "data"
+	// dbFile = "data/tasks.db"
 )
 
 const createTasksTableSQL = `
@@ -26,12 +26,12 @@ func createSchema(db *sql.DB) error {
 	return err
 }
 
-func Open() (*sql.DB, error) {
+func Open(path string) (*sql.DB, error) {
 	if err := os.MkdirAll(dbDir, 0o755); err != nil {
 		return nil, err
 	}
 
-	db, err := sql.Open("sqlite", dbFile)
+	db, err := sql.Open("sqlite", path)
 	if err != nil {
 		return nil, err
 	}
