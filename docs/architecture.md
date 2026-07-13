@@ -1,307 +1,314 @@
+# docs/architecture.md
+
 # Arquitetura do Projeto
 
-Este documento registra a evolução da arquitetura da aplicação e, principalmente, os conceitos da linguagem Go e da Standard Library aprendidos durante o desenvolvimento.
+Este documento registra as principais decisões arquiteturais tomadas durante o desenvolvimento do projeto.
 
-O objetivo não é apenas documentar o código, mas também explicar as decisões de projeto, os padrões recorrentes encontrados na linguagem e o raciocínio por trás de cada escolha arquitetural.
-
----
-
-# Commit 01 — Estrutura do Projeto
-
-## Objetivos
-
-* Criar a estrutura inicial do projeto.
-* Organizar o código seguindo as convenções da comunidade Go.
-* Preparar o projeto para crescimento sem complicar a estrutura.
-
-## Conceitos aprendidos
-
-* Organização de projetos Go.
-* `cmd/` como ponto de entrada da aplicação.
-* `internal/` para código privado da aplicação.
-* Separação por responsabilidade.
-* Organização em pacotes.
-
-## Decisões arquiteturais
-
-* Um único executável.
-* Estrutura preparada para crescimento.
-* Separação entre domínio, infraestrutura e ponto de entrada.
-* Projeto organizado desde o início.
-
-## Padrões da Standard Library observados
-
-* Organização em pacotes pequenos.
-* Responsabilidade única por pacote.
-* Código simples e explícito.
-
-## Filosofia Go descoberta neste commit
-
-* Comece simples.
-* Organize antes de crescer.
-* A estrutura do projeto deve facilitar a navegação.
+O objetivo é servir como um diário técnico da evolução da aplicação.
 
 ---
 
-# Commit 02 — Banco de Dados
+# Visão Geral
 
-## Objetivos
-
-* Configurar o SQLite.
-* Inicializar automaticamente o banco.
-* Criar a tabela `tasks`.
-
-## Conceitos aprendidos
-
-* `database/sql`
-* Drivers SQL
-* Importação anônima (`_`)
-* Registro automático de drivers
-* `*sql.DB`
-* Pool de conexões
-* `Ping()`
-* `Exec()`
-* `defer`
-* Escape Analysis
-* `os.MkdirAll()`
-* Inicialização idempotente
-
-## Decisões arquiteturais
-
-* Um único `*sql.DB` compartilhado por toda a aplicação.
-* Inicialização centralizada em `database.Open()`.
-* Criação automática da estrutura do banco.
-* SQL separado do restante do código.
-* Um único pool de conexões durante toda a execução da aplicação.
-
-## Padrões da Standard Library observados
-
-* Recursos são fechados por quem os adquiriu (`defer`).
-* Objetos de infraestrutura costumam ser compartilhados.
-* Funções pequenas e lineares.
-* Inicialização explícita.
-
-## Filosofia Go descoberta neste commit
-
-* Compartilhe recursos caros.
-* O compilador decide quando um objeto deve ir para o heap (Escape Analysis).
-* Prefira uma inicialização previsível e determinística.
-
----
-
-# Commit 03 — Repository (em andamento)
-
-## Objetivos
-
-* Criar a entidade `Task`.
-* Criar a camada Repository.
-* Implementar o CRUD utilizando `database/sql`.
-
-## Funcionalidades implementadas
-
-* Model `Task`.
-* `TaskRepository`.
-* `Create()`.
-* `FindByID()`.
-* `List()`.
-
-## Conceitos aprendidos
-
-### Linguagem
-
-* Structs
-* Zero Values
-* Ponteiros
-* Passagem de parâmetros por valor
-* Receivers
-* Escape Analysis
-
-### Standard Library
-
-* `context.Context`
-* `ExecContext()`
-* `QueryRowContext()`
-* `QueryContext()`
-* `Scan()`
-* `sql.Result`
-* `LastInsertId()`
-* `Rows`
-* `rows.Next()`
-* `rows.Close()`
-* `rows.Err()`
-
-### SQL
-
-* SQL parametrizado
-* Placeholders (`?`)
-* SQL Injection
-* `SELECT` explícito
-* `ORDER BY`
-
-## Decisões arquiteturais
-
-* Repository concreto (interfaces serão introduzidas apenas quando houver necessidade).
-* `context.Context` como primeiro parâmetro das operações de I/O.
-* SQL armazenado em constantes.
-* Entidades passadas por ponteiro quando podem ser modificadas.
-* Não utilizar `SELECT *`.
-* O `main.go` atua temporariamente como laboratório de testes.
-
-## Padrões da Standard Library observados
-
-* APIs preferem preencher estruturas fornecidas pelo chamador em vez de criar novos objetos.
-* O controle da alocação normalmente pertence ao chamador.
-* Ponteiros representam intenção de modificação.
-* `Context` é propagado entre camadas.
-* Recursos adquiridos devem ser liberados por quem os adquiriu.
-* SQL e dados são mantidos separados através de placeholders.
-* Ao iterar resultados, a API fornece um cursor (`Rows`) em vez de retornar todos os registros de uma vez.
-
-## Princípios de Projeto Descobertos
-
-* **YAGNI (You Aren't Gonna Need It)**: não implemente hoje uma solução para um problema que ainda não existe.
-* Elimine redundâncias.
-* Refatore quando houver um novo requisito, não antes.
-* Prefira código que conte uma história.
-
-## Filosofia Go descoberta neste commit
-
-* O chamador controla a memória.
-* A biblioteca apenas preenche estruturas fornecidas pelo usuário.
-* Prefira funções pequenas.
-* Prefira simplicidade à abstração prematura.
-* Escreva código explícito.
-
----
-
-# Glossário
-
-## Receiver
-
-Parâmetro especial que associa um método a um tipo.
-
-Exemplo:
-
-```go
-func (r *TaskRepository) Create(...)
+```text
+CLI
+ │
+ ▼
+TaskService
+ │
+ ▼
+TaskRepository
+ │
+ ▼
+database/sql
+ │
+ ▼
+SQLite
 ```
 
----
-
-## Zero Value
-
-Valor padrão de qualquer tipo em Go.
-
-Exemplos:
-
-* `0`
-* `false`
-* `""`
-* `nil`
-* `time.Time{}`
+Cada camada possui uma única responsabilidade.
 
 ---
 
-## Escape Analysis
+# Organização em Camadas
 
-Análise realizada pelo compilador para decidir se um objeto ficará na stack ou será movido para o heap.
+## Main
+
+Responsável por:
+
+* iniciar a aplicação;
+* criar as dependências;
+* conectar as camadas.
+
+Não possui regras de negócio.
 
 ---
 
-## Context
+## Service
 
-Representa uma operação em andamento e permite propagar cancelamento, timeout e metadados por toda a cadeia de chamadas.
+Responsável por:
+
+* implementar casos de uso;
+* validar entradas;
+* aplicar regras de negócio;
+* traduzir erros da infraestrutura.
+
+Não conhece SQL.
+
+Não conhece detalhes de persistência.
 
 ---
 
 ## Repository
 
-Camada responsável por persistir e recuperar entidades do domínio, encapsulando os detalhes da tecnologia de armazenamento.
+Responsável por:
+
+* persistência;
+* consultas SQL;
+* comunicação com `database/sql`.
+
+Não possui regras de negócio.
 
 ---
 
-## Pool de Conexões
+## Database
 
-Conjunto de conexões gerenciado por `*sql.DB`, reutilizado durante toda a execução da aplicação.
+Responsável por:
 
----
-
-## Placeholder
-
-Marcador (`?`) utilizado em comandos SQL para separar o comando dos valores dos parâmetros.
-
-Além de evitar SQL Injection, melhora a legibilidade e permite que o driver trate corretamente os dados.
+* abrir o banco;
+* configurar a conexão;
+* criar as tabelas quando necessário.
 
 ---
 
-## Cursor
+# Decisões Arquiteturais
 
-Objeto que representa um conjunto de resultados retornados por uma consulta SQL.
+## Repository Pattern
 
-No Go é representado por `*sql.Rows`.
+O acesso ao banco é isolado no Repository.
+
+Benefícios:
+
+* separação de responsabilidades;
+* facilidade de manutenção;
+* reutilização;
+* clareza.
 
 ---
 
-## Scan
+## Service Layer
 
-Método responsável por copiar os valores retornados pelo banco para variáveis fornecidas pelo chamador.
+A camada de serviço implementa os casos de uso.
+
+Ela impede que regras de negócio sejam espalhadas pela aplicação.
 
 ---
 
-# Roadmap
+## Erros de Domínio
 
-## ✅ Concluído
+A camada de Service traduz erros da infraestrutura.
 
-* Estrutura do projeto.
-* Inicialização do banco.
-* Model `Task`.
-* Repository.
-* `Create()`.
-* `FindByID()`.
-* `List()`.
+Exemplo:
 
-## 🚧 Em andamento
+```text
+sql.ErrNoRows
 
-* `Update()`
-* `Delete()`
-* Testes completos do Repository.
-* Tag `v0.3.0`
+↓
 
-## Próximos passos
+ErrTaskNotFound
+```
 
-### Commit 04
+As camadas superiores nunca precisam conhecer `database/sql`.
 
-* Service Layer.
-* Regras de negócio.
-* Tradução de erros de infraestrutura para erros de domínio.
+---
 
-### Commit 05
+## Casos de Uso
 
-* CLI utilizando Cobra.
-* Comandos:
+O Service trabalha com linguagem do domínio.
 
-  * `add`
-  * `list`
-  * `done`
-  * `delete`
+Exemplos:
 
-### Futuro
+* CreateTask
+* ListTasks
+* CompleteTask
+* DeleteTask
 
-* Testes automatizados.
-* Configuração via `.env`.
-* Logging estruturado.
-* Paginação.
-* Filtros.
-* Busca por texto.
-* Migrações de banco.
-* Docker.
-* GitHub Actions.
-* Releases automáticas.
+Evitamos métodos genéricos como:
 
-## Princípios Arquiteturais
+* UpdateTask
 
-- Prefira duplicação simples a abstrações prematuras.
-- Cada Repository representa uma entidade do domínio.
-- Generics devem ser utilizados quando o algoritmo é realmente independente do tipo.
-- Reflection deve ser evitada quando existe uma solução simples e explícita.
-- Escreva código que seja fácil de ler, mesmo que repita algumas linhas.
+porque a aplicação trabalha com intenções do usuário, não com operações do banco.
+
+---
+
+## Testes
+
+Existem dois conjuntos de testes.
+
+### Repository
+
+Valida:
+
+* SQL
+* Persistência
+* CRUD
+
+Utiliza SQLite em memória.
+
+---
+
+### Service
+
+Valida:
+
+* regras de negócio;
+* casos de uso;
+* tradução de erros.
+
+Também utiliza SQLite em memória.
+
+---
+
+# Filosofia de Desenvolvimento
+
+Durante este projeto foram adotados alguns princípios.
+
+## KISS
+
+Keep It Simple, Stupid.
+
+Sempre preferir a solução mais simples.
+
+---
+
+## YAGNI
+
+You Aren't Gonna Need It.
+
+Abstrações somente quando existe necessidade real.
+
+---
+
+## DRY
+
+Don't Repeat Yourself.
+
+Entretanto:
+
+Nem toda repetição merece uma abstração.
+
+A abstração deve surgir apenas quando a repetição representa um problema concreto.
+
+---
+
+## Responsabilidade Única
+
+Cada camada possui apenas um papel.
+
+* Main compõe.
+* Service decide.
+* Repository persiste.
+
+---
+
+## Testar comportamento
+
+Os testes verificam comportamento observável.
+
+Eles não verificam detalhes internos de implementação.
+
+Isso permite refatorações sem quebrar a suíte de testes.
+
+---
+
+## Código Idiomático
+
+Foram adotadas práticas comuns na comunidade Go:
+
+* receivers pequenos;
+* funções curtas;
+* early return;
+* uso de `context.Context`;
+* zero value;
+* erros explícitos;
+* composição em vez de herança.
+
+---
+
+# Evolução do Projeto
+
+## Commit 01
+
+Estrutura inicial.
+
+---
+
+## Commit 02
+
+Banco de dados.
+
+Aprendizados:
+
+* `database/sql`
+* drivers
+* pool de conexões
+
+---
+
+## Commit 03
+
+Repository.
+
+Aprendizados:
+
+* CRUD
+* SQL parametrizado
+* Context
+* Scan
+* Rows
+
+---
+
+## Commit 04
+
+Testes automatizados.
+
+Aprendizados:
+
+* pacote `testing`
+* `t.Helper`
+* `t.Cleanup`
+* Table-Driven Tests
+* testes de integração
+
+---
+
+## Commit 05
+
+Service Layer.
+
+Aprendizados:
+
+* casos de uso;
+* erros de domínio;
+* tradução de erros;
+* separação entre domínio e infraestrutura.
+
+---
+
+# Próximos Passos
+
+* CLI com Cobra
+* Logging
+* Configuração via `.env`
+* Docker
+* GitHub Actions
+* Distribuição da aplicação
+
+---
+
+# Objetivo Final
+
+Construir um projeto pequeno, porém suficientemente completo para servir como base para novas aplicações Go.
+
+O foco não é apenas implementar um gerenciador de tarefas, mas consolidar um conjunto de práticas idiomáticas da linguagem, produzindo um código simples, testável, organizado e alinhado com a filosofia da comunidade Go.

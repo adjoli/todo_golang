@@ -1,0 +1,218 @@
+package service
+
+import (
+	"context"
+	"errors"
+	"testing"
+)
+
+// ----------------------------------------------
+func TestCreateTask(t *testing.T) {
+	tests := []struct {
+		name      string
+		title     string
+		wantError error
+	}{
+		{
+			name:      "valid title",
+			title:     "Estudar Go",
+			wantError: nil,
+		},
+		{
+			name:      "empty title",
+			title:     "",
+			wantError: ErrEmptyTitle,
+		},
+		{
+			name:      "blank spaces",
+			title:     "     ",
+			wantError: ErrEmptyTitle,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(f *testing.T) {
+			service := newTestService(t)
+
+			task, err := service.CreateTask(
+				context.Background(),
+				tt.title,
+			)
+
+			if !errors.Is(err, tt.wantError) {
+				t.Fatalf(
+					"expected error %v, got %v",
+					tt.wantError,
+					err,
+				)
+			}
+
+			if tt.wantError != nil {
+				return
+			}
+
+			if task.ID == 0 {
+				t.Fatal("expected task ID to be populated")
+			}
+
+			if task.Title != tt.title {
+				t.Errorf(
+					"expected title %q, got %q",
+					tt.title,
+					task.Title,
+				)
+			}
+
+			if task.Completed {
+				t.Error("expected task to be created as not completed")
+			}
+		})
+	}
+}
+
+// ----------------------------------------------
+func TestListTasks(t *testing.T) {
+	tests := []struct {
+		name  string
+		tasks []string
+		want  int
+	}{
+		{
+			name:  "empty list",
+			tasks: nil,
+			want:  0,
+		},
+		{
+			name: "two tasks",
+			tasks: []string{
+				"Estudar Go",
+				"Estudar SQL",
+			},
+			want: 2,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			service := newTestService(t)
+			ctx := context.Background()
+
+			for _, title := range tt.tasks {
+				_, err := service.CreateTask(ctx, title)
+				if err != nil {
+					t.Fatalf("CreateTask(): %v", err)
+				}
+			}
+
+			tasks, err := service.ListTasks(ctx)
+			if err != nil {
+				t.Fatalf("ListTasks(): %v", err)
+			}
+
+			if len(tasks) != tt.want {
+				t.Fatalf(
+					"expected %d tasks, got %d",
+					tt.want,
+					len(tasks),
+				)
+			}
+		})
+	}
+}
+
+// ----------------------------------------------
+func TestCompleteTask(t *testing.T) {
+	service := newTestService(t)
+	ctx := context.Background()
+
+	task, err := service.CreateTask(ctx, "Estudar Go")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := service.CompleteTask(ctx, task.ID); err != nil {
+		t.Fatalf("CompleteTask(): %v", err)
+	}
+
+	tasks, err := service.ListTasks(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !tasks[0].Completed {
+		t.Fatal("expected task to be completed")
+	}
+}
+
+// ----------------------------------------------
+func TestCompleteTask_NotFound(t *testing.T) {
+	service := newTestService(t)
+
+	err := service.CompleteTask(
+		context.Background(),
+		999,
+	)
+
+	if !errors.Is(err, ErrTaskNotFound) {
+		t.Fatalf(
+			"expected ErrTaskNotFound, got %v",
+			err,
+		)
+	}
+}
+
+// ----------------------------------------------
+func TestCompleteTask_AlreadyCompleted(t *testing.T) {
+	service := newTestService(t)
+	ctx := context.Background()
+
+	task, _ := service.CreateTask(
+		ctx,
+		"Estudar Go",
+	)
+
+	if err := service.CompleteTask(ctx, task.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	err := service.CompleteTask(ctx, task.ID)
+
+	if !errors.Is(err, ErrTaskAlreadyCompleted) {
+		t.Fatalf("expected ErrTaskAlreadyCompleted, got %v", err)
+	}
+}
+
+// ----------------------------------------------
+func TestDeleteTask(t *testing.T) {
+	service := newTestService(t)
+	ctx := context.Background()
+
+	task, _ := service.CreateTask(ctx, "Estudar Go")
+
+	if err := service.DeleteTask(ctx, task.ID); err != nil {
+		t.Fatal(err)
+	}
+
+	tasks, err := service.ListTasks(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(tasks) != 0 {
+		t.Fatal("expected empty list")
+	}
+}
+
+// ----------------------------------------------
+func TestDeleteTask_NotFound(t *testing.T) {
+	service := newTestService(t)
+
+	err := service.DeleteTask(
+		context.Background(),
+		999,
+	)
+
+	if !errors.Is(err, ErrTaskNotFound) {
+		t.Fatalf("expected ErrTaskNotFound, got %v", err)
+	}
+}

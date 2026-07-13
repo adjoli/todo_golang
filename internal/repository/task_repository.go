@@ -17,7 +17,11 @@ func New(db *sql.DB) *TaskRepository {
 	}
 }
 
-func (r *TaskRepository) Create(ctx context.Context, task *models.Task) error {
+// ----------------------------------------------
+func (r *TaskRepository) Create(
+	ctx context.Context,
+	task *models.Task,
+) error {
 	result, err := r.db.ExecContext(
 		ctx,
 		sqlInsertTask,
@@ -39,7 +43,11 @@ func (r *TaskRepository) Create(ctx context.Context, task *models.Task) error {
 	return nil
 }
 
-func (r *TaskRepository) FindByID(ctx context.Context, id int64) (*models.Task, error) {
+// ----------------------------------------------
+func (r *TaskRepository) FindByID(
+	ctx context.Context,
+	id int64,
+) (*models.Task, error) {
 	row := r.db.QueryRowContext(ctx, sqlFindTaskByID, id)
 
 	task := &models.Task{}
@@ -56,7 +64,10 @@ func (r *TaskRepository) FindByID(ctx context.Context, id int64) (*models.Task, 
 	return task, nil
 }
 
-func (r *TaskRepository) List(ctx context.Context) ([]models.Task, error) {
+// ----------------------------------------------
+func (r *TaskRepository) List(
+	ctx context.Context,
+) ([]models.Task, error) {
 	rows, err := r.db.QueryContext(ctx, sqlListTasks)
 	if err != nil {
 		return nil, err
@@ -87,7 +98,11 @@ func (r *TaskRepository) List(ctx context.Context) ([]models.Task, error) {
 	return tasks, nil
 }
 
-func (r *TaskRepository) Update(ctx context.Context, task *models.Task) error {
+// ----------------------------------------------
+func (r *TaskRepository) Update(
+	ctx context.Context,
+	task *models.Task,
+) error {
 	result, err := r.db.ExecContext(
 		ctx,
 		sqlUpdateTask,
@@ -111,7 +126,11 @@ func (r *TaskRepository) Update(ctx context.Context, task *models.Task) error {
 	return nil
 }
 
-func (r *TaskRepository) Delete(ctx context.Context, id int64) error {
+// ----------------------------------------------
+func (r *TaskRepository) Delete(
+	ctx context.Context,
+	id int64,
+) error {
 	result, err := r.db.ExecContext(ctx, sqlDeleteTask, id)
 	if err != nil {
 		return err
