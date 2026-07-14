@@ -3,22 +3,18 @@ package main
 import (
 	"log"
 
-	"github.com/adjoli/todo_chatgpt/internal/database"
-	"github.com/adjoli/todo_chatgpt/internal/repository"
-	"github.com/adjoli/todo_chatgpt/internal/service"
+	"github.com/adjoli/todo_chatgpt/internal/app"
+	"github.com/adjoli/todo_chatgpt/internal/cli"
 )
 
 func main() {
-	db, err := database.Open(database.DefaultPath)
+	app, err := app.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer app.Close()
 
-	repo := repository.New(db)
-
-	service := service.New(repo)
-
-	log.Println("Task Manager iniciado.")
-	_ = service
+	if err := cli.Execute(app); err != nil {
+		log.Fatal(err)
+	}
 }
