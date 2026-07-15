@@ -1,42 +1,39 @@
-# README.md
-
 # Task Manager
 
-Um projeto didático desenvolvido em Go com o objetivo de aprender a linguagem de forma progressiva, aplicando boas práticas, arquitetura em camadas e utilizando prioritariamente a Standard Library.
+A command-line Task Manager written in Go.
 
-O projeto é construído em pequenos commits, onde cada etapa introduz um novo conceito e consolida os conhecimentos adquiridos anteriormente.
+This project was created as a practical study of the Go language and its ecosystem. Rather than focusing only on implementing a CRUD application, the project explores idiomatic Go, software architecture, testing, and engineering best practices through incremental development.
 
-## Objetivos
-
-* Aprender Go de forma prática.
-* Conhecer a Standard Library.
-* Aplicar boas práticas da comunidade Go.
-* Construir uma arquitetura simples, idiomática e de fácil manutenção.
-* Utilizar Git de forma incremental, com commits representando pequenas evoluções do sistema.
+Every commit represents a complete learning milestone.
 
 ---
 
-## Funcionalidades atuais
+# Features
 
-* Criar tarefas
-* Buscar tarefa por ID
-* Listar tarefas
-* Marcar tarefa como concluída
-* Excluir tarefas
+Current features:
+
+* Create tasks
+* List tasks
+* Mark tasks as completed
+* Remove tasks
+* SQLite persistence
+* Command-line interface (Cobra)
+* Automated tests
+* Layered architecture
 
 ---
 
-## Tecnologias
+# Technology Stack
 
 * Go
 * SQLite
-* `database/sql`
-* Context API
 * Standard Library
+* `database/sql`
+* Cobra
 
 ---
 
-## Estrutura do projeto
+# Project Structure
 
 ```text
 task-manager/
@@ -49,9 +46,26 @@ task-manager/
 │   └── taskmanager.db
 │
 ├── docs/
-│   └── architecture.md
+│   ├── architecture.md
+│   ├── decisions.md
+│   ├── diary.md
+│   ├── glossary.md
+│   ├── principles.md
+│   └── roadmap.md
 │
 ├── internal/
+│   ├── app/
+│   │   └── app.go
+│   │
+│   ├── cli/
+│   │   ├── add.go
+│   │   ├── done.go
+│   │   ├── errors.go
+│   │   ├── helpers.go
+│   │   ├── list.go
+│   │   ├── remove.go
+│   │   └── root.go
+│   │
 │   ├── database/
 │   │   ├── config.go
 │   │   └── database.go
@@ -79,104 +93,101 @@ task-manager/
 
 ---
 
-## Arquitetura
+# Architecture
 
 ```text
-                 CLI (em desenvolvimento)
-                         │
-                         ▼
-                 TaskService
-                         │
-                         ▼
-               TaskRepository
-                         │
-                         ▼
-               database/sql
-                         │
-                         ▼
-                     SQLite
+                 CLI
+                  │
+                  ▼
+             TaskService
+                  │
+                  ▼
+           TaskRepository
+                  │
+                  ▼
+            database/sql
+                  │
+                  ▼
+               SQLite
 ```
 
-Cada camada possui uma única responsabilidade.
+Each layer has a single responsibility.
 
-### TaskService
-
-Responsável pelas regras de negócio.
-
-Exemplos:
-
-* validar dados de entrada;
-* criar entidades do domínio;
-* traduzir erros da infraestrutura;
-* implementar casos de uso.
-
-### TaskRepository
-
-Responsável exclusivamente pela persistência.
-
-Exemplos:
-
-* INSERT
-* SELECT
-* UPDATE
-* DELETE
-
-O Repository não conhece regras de negócio.
+* **CLI** receives user input.
+* **Service** implements business rules.
+* **Repository** handles persistence.
+* **SQLite** stores application data.
 
 ---
 
-## Conceitos estudados
+# Design Principles
 
-### Go
+This project follows several principles commonly adopted by the Go community.
 
-* Packages
-* Modules
-* Ponteiros
-* Receivers
-* Structs
-* Métodos
-* Zero Value
-* Context
-
-### Banco de Dados
-
-* `database/sql`
-* SQLite
-* Connection Pool
-* SQL parametrizado
-* `ExecContext`
-* `QueryContext`
-* `QueryRowContext`
-* `Rows`
-* `Scan`
-* `RowsAffected`
-* `LastInsertId`
-
-### Arquitetura
-
-* Repository Pattern
-* Service Layer
-* Casos de Uso
-* Erros de Domínio
-* Separação de Responsabilidades
-* YAGNI
-* Código Idiomático
-
-### Testes
-
-* pacote `testing`
-* Helpers
-* `t.Helper`
-* `t.Cleanup`
-* Testes de Integração
-* Table-Driven Tests
-* Testar comportamento ao invés da implementação
+* Simplicity over unnecessary abstraction.
+* Explicit code over magic.
+* Small packages with well-defined responsibilities.
+* Business rules isolated from infrastructure.
+* Test behavior instead of implementation.
+* Introduce abstractions only when there is a real need (YAGNI).
 
 ---
 
-## Executando
+# Current Commands
 
-Compile e execute:
+## Add a task
+
+```bash
+taskmanager add "Study Go"
+```
+
+---
+
+## List tasks
+
+```bash
+taskmanager list
+```
+
+---
+
+## Complete a task
+
+```bash
+taskmanager done 1
+```
+
+---
+
+## Remove a task
+
+```bash
+taskmanager remove 1
+```
+
+Alias:
+
+```bash
+taskmanager rm 1
+```
+
+---
+
+# Running the Project
+
+Clone the repository:
+
+```bash
+git clone <repository-url>
+```
+
+Enter the project directory:
+
+```bash
+cd task-manager
+```
+
+Run the application:
 
 ```bash
 go run ./cmd/taskmanager
@@ -184,27 +195,27 @@ go run ./cmd/taskmanager
 
 ---
 
-## Executando os testes
+# Running Tests
 
-Todos os testes:
+Run all tests:
 
 ```bash
 go test ./...
 ```
 
-Cobertura:
+Coverage:
 
 ```bash
 go test -cover ./...
 ```
 
-Executar o analisador estático:
+Static analysis:
 
 ```bash
 go vet ./...
 ```
 
-Formatar o projeto:
+Format the project:
 
 ```bash
 go fmt ./...
@@ -212,66 +223,52 @@ go fmt ./...
 
 ---
 
-## Roadmap
+# Learning Roadmap
 
-### ✅ Commit 01
+## Completed
 
-Estrutura inicial do projeto.
+* Project structure
+* SQLite integration
+* Repository Pattern
+* Automated tests
+* Service Layer
+* Command-Line Interface
 
-### ✅ Commit 02
+## Planned
 
-Banco de dados.
-
-### ✅ Commit 03
-
-Repository.
-
-### ✅ Commit 04
-
-Testes automatizados.
-
-### ✅ Commit 05
-
-Service Layer.
-
-### ⏳ Commit 06
-
-CLI com Cobra.
-
-### ⏳ Commit 07
-
-Logging.
-
-### ⏳ Commit 08
-
-Configuração via `.env`.
-
-### ⏳ Commit 09
-
-Docker.
-
-### ⏳ Commit 10
-
-GitHub Actions.
+* Structured logging
+* Configuration management
+* Environment variables
+* Docker
+* GitHub Actions
+* Release automation
 
 ---
 
-## Filosofia do projeto
+# Documentation
 
-Este projeto procura seguir a filosofia da linguagem Go.
+Additional documentation is available in the `docs` directory.
 
-Alguns princípios adotados:
-
-* simplicidade acima de abstração;
-* clareza acima de inteligência;
-* pequenas funções;
-* responsabilidades bem definidas;
-* abstrações apenas quando existe necessidade real;
-* preferir código explícito;
-* testes como parte do desenvolvimento.
+* `architecture.md`
+* `decisions.md`
+* `diary.md`
+* `glossary.md`
+* `principles.md`
+* `roadmap.md`
 
 ---
 
-## Licença
+# Project Goals
 
-MIT License.
+This repository has two primary goals.
+
+1. Build a complete command-line application in Go.
+2. Serve as a long-term reference for idiomatic Go development.
+
+The focus is not only on writing code, but also on understanding the reasoning behind architectural decisions, testing strategies, and software engineering practices.
+
+---
+
+# License
+
+This project is licensed under the MIT License.
