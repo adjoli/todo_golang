@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/adjoli/todo_chatgpt/internal/database"
+	"github.com/adjoli/todo_chatgpt/internal/logger"
 	"github.com/adjoli/todo_chatgpt/internal/repository"
 )
 
@@ -19,7 +20,8 @@ func newTestService(t *testing.T) *TaskService {
 		_ = db.Close()
 	})
 
+	logger := logger.New()
 	repo := repository.New(db)
 
-	return New(repo)
+	return New(repo, logger)
 }

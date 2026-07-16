@@ -3,9 +3,11 @@ package app
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 
 	"github.com/adjoli/todo_chatgpt/internal/config"
 	"github.com/adjoli/todo_chatgpt/internal/database"
+	"github.com/adjoli/todo_chatgpt/internal/logger"
 	"github.com/adjoli/todo_chatgpt/internal/repository"
 	"github.com/adjoli/todo_chatgpt/internal/service"
 )
@@ -13,6 +15,7 @@ import (
 type App struct {
 	cfg         *config.Config
 	db          *sql.DB
+	logger      *slog.Logger
 	taskService *service.TaskService
 }
 
@@ -42,8 +45,9 @@ func New() (*App, error) {
 		return nil, fmt.Errorf("initialize application: %w", err)
 	}
 
+	logger := logger.New()
 	repo := repository.New(db)
-	service := service.New(repo)
+	service := service.New(repo, logger)
 
 	return &App{
 		db:          db,

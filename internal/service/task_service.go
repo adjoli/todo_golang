@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -12,12 +13,19 @@ import (
 )
 
 type TaskService struct {
-	repo *repository.TaskRepository
+	repo   *repository.TaskRepository
+	logger *slog.Logger
 }
 
 // New creates a new TaskService
-func New(repo *repository.TaskRepository) *TaskService {
-	return &TaskService{repo: repo}
+func New(
+	repo *repository.TaskRepository,
+	logger *slog.Logger,
+) *TaskService {
+	return &TaskService{
+		repo:   repo,
+		logger: logger,
+	}
 }
 
 // ----------------------------------------------
@@ -41,6 +49,11 @@ func (s *TaskService) CreateTask(
 		return nil, err
 	}
 
+	s.logger.Info(
+		"task created",
+		slog.Int64("id", task.ID),
+		slog.String("title", task.Title),
+	)
 	return task, nil
 }
 
@@ -58,16 +71,38 @@ func (s *TaskService) CompleteTask(
 ) error {
 	task, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		return mapRepositoryError(err)
+		err = mapRepositoryError(err)
+		if errors.Is(err, ErrTaskNotFound) {
+			s.logger.Warn(
+				"task not found",
+				slog.Int64("id", id),
+			)
+		}
+		return err
 	}
 
 	if task.Completed {
+		s.logger.Warn(
+			"task already completed",
+			slog.Int64("id", task.ID),
+			slog.String("title", task.Title),
+		)
 		return ErrTaskAlreadyCompleted
 	}
 
 	task.Completed = true
 
-	return s.repo.Update(ctx, task)
+	if err := s.repo.Update(ctx, task); err != nil {
+		return err
+	}
+
+	s.logger.Info(
+		"task completed",
+		slog.Int64("id", task.ID),
+		slog.String("title", task.Title),
+	)
+
+	return nil
 }
 
 // ----------------------------------------------
@@ -77,8 +112,21 @@ func (s *TaskService) DeleteTask(
 ) error {
 	err := s.repo.Delete(ctx, id)
 	if err != nil {
-		return mapRepositoryError(err)
+		err = mapRepositoryError(err)
+		if errors.Is(err, ErrTaskNotFound) {
+			s.logger.Warn(
+				"task not found",
+				slog.Int64("id", id),
+			)
+		}
+		return err
 	}
+
+	s.logger.Info(
+		"task removed",
+		slog.Int64("id", id),
+	)
+
 	return nil
 }
 
