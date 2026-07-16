@@ -11,7 +11,7 @@ import (
 func newTestRepository(t *testing.T) *TaskRepository {
 	t.Helper()
 
-	db, err := database.Open(":memory:")
+	db, err := database.New(":memory:")
 	if err != nil {
 		t.Fatalf("opening database: %v", err)
 	}

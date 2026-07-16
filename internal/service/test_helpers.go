@@ -10,7 +10,7 @@ import (
 func newTestService(t *testing.T) *TaskService {
 	t.Helper()
 
-	db, err := database.Open(":memory:")
+	db, err := database.New(":memory:")
 	if err != nil {
 		t.Fatalf("opening database: %v", err)
 	}

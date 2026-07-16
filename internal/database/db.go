@@ -2,14 +2,9 @@ package database
 
 import (
 	"database/sql"
-	"os"
+	"fmt"
 
 	_ "modernc.org/sqlite"
-)
-
-const (
-	dbDir = "data"
-	// dbFile = "data/tasks.db"
 )
 
 const createTasksTableSQL = `
@@ -26,24 +21,20 @@ func createSchema(db *sql.DB) error {
 	return err
 }
 
-func Open(path string) (*sql.DB, error) {
-	if err := os.MkdirAll(dbDir, 0o755); err != nil {
-		return nil, err
-	}
-
+func New(path string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("open sqlite database: %w", err)
 	}
 
 	if err := db.Ping(); err != nil {
 		db.Close()
-		return nil, err
+		return nil, fmt.Errorf("ping sqlite database: %w", err)
 	}
 
 	if err := createSchema(db); err != nil {
 		db.Close()
-		return nil, err
+		return nil, fmt.Errorf("create database tables: %w", err)
 	}
 
 	return db, nil
