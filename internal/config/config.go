@@ -30,7 +30,7 @@ func New() (*Config, error) {
 }
 
 // ----------------------------------------------
-// FUNÇÕES PRIVADAS
+// HELPER FUNCTIONS
 // ----------------------------------------------
 func defaultConfig() *Config {
 	return &Config{

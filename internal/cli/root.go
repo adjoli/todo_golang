@@ -37,6 +37,7 @@ a simple and useful task management tool.`,
 		c.newAddCommand(),
 		c.newDoneCommand(),
 		c.newRemoveCommand(),
+		c.newUpdateCommand(),
 	)
 
 	return rootCmd

@@ -216,3 +216,31 @@ func TestDeleteTask_NotFound(t *testing.T) {
 		t.Fatalf("expected ErrTaskNotFound, got %v", err)
 	}
 }
+
+// ----------------------------------------------
+func TestUpdateTask(t *testing.T) {
+	service := newTestService(t)
+	ctx := context.Background()
+
+	task, err := service.CreateTask(ctx, "Estudar Go")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := service.UpdateTask(
+		ctx,
+		task.ID,
+		"Estudar Go profundamente",
+	); err != nil {
+		t.Fatalf("UpdateTask(): %v", err)
+	}
+
+	tasks, err := service.ListTasks(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if tasks[0].Title != "Estudar Go profundamente" {
+		t.Fatalf("expected updated title, got %q", tasks[0].Title)
+	}
+}

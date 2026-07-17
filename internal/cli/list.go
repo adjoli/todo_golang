@@ -49,7 +49,7 @@ func (c *CLI) runList(
 // ----------------------------------------------
 func statusLabel(completed bool) string {
 	if completed {
-		return "DONE"
+		return "🟢"
 	}
-	return "TODO"
+	return "🔴"
 }

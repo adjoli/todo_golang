@@ -33,10 +33,9 @@ func (s *TaskService) CreateTask(
 	ctx context.Context,
 	title string,
 ) (*models.Task, error) {
-	title = strings.TrimSpace(title)
-
-	if title == "" {
-		return nil, ErrEmptyTitle
+	title, err := validateTitle(title)
+	if err != nil {
+		return nil, err
 	}
 
 	task := &models.Task{
@@ -131,9 +130,66 @@ func (s *TaskService) DeleteTask(
 }
 
 // ----------------------------------------------
+func (s *TaskService) UpdateTask(
+	ctx context.Context,
+	id int64,
+	title string,
+) error {
+	task, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		err = mapRepositoryError(err)
+		if errors.Is(err, ErrTaskNotFound) {
+			s.logger.Warn(
+				"task not found",
+				slog.Int64("id", id),
+			)
+		}
+		return err
+	}
+
+	title, err = validateTitle(title)
+	if err != nil {
+		return err
+	}
+
+	oldTitle := task.Title
+	
+	if oldTitle == title {
+		return nil
+	}
+
+	task.Title = title
+
+	if err := s.repo.Update(ctx, task); err != nil {
+		return err
+	}
+
+	s.logger.Info(
+		"task update",
+		slog.Int64("id", task.ID),
+		slog.String("old_title", oldTitle),
+		slog.String("new_title", task.Title),
+	)
+
+	return nil
+}
+
+// ----------------------------------------------
+// HELPER FUNCTIONS
+// ----------------------------------------------
 func mapRepositoryError(err error) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return ErrTaskNotFound
 	}
 	return err
+}
+
+func validateTitle(title string) (string, error) {
+	title = strings.TrimSpace(title)
+
+	if title == "" {
+		return "", ErrEmptyTitle
+	}
+
+	return title, nil
 }
