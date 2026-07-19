@@ -9,21 +9,42 @@ import (
 )
 
 func (c *CLI) newListCommand() *cobra.Command {
+	var all bool
+
 	cmd := &cobra.Command{
 		Use:   "list",
-		Short: "List all tasks",
-		RunE:  c.runList,
+		Short: "List tasks",
+		RunE:  func(cmd *cobra.Command, args []string) error {
+			return c.runList(cmd, args, all)
+
+		},
 	}
+
+	cmd.Flags().BoolVar(
+		&all,
+		"all",
+		false,
+		"List completed and pending tasks",
+	)
+
 	return cmd
 }
 
 func (c *CLI) runList(
 	cmd *cobra.Command,
 	args []string,
+	all bool,
 ) error {
+	filter := models.TaskFilter{}
+
+	if !all {
+		completed := false
+		filter.Completed = &completed
+	}
+
 	tasks, err := c.app.TaskService().ListTasks(
 		context.Background(),
-		models.TaskFilter{},
+		filter,
 	)
 	if err != nil {
 		return err
