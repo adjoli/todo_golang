@@ -67,8 +67,25 @@ func (r *TaskRepository) FindByID(
 // ----------------------------------------------
 func (r *TaskRepository) List(
 	ctx context.Context,
+	filter models.TaskFilter,
 ) ([]models.Task, error) {
-	rows, err := r.db.QueryContext(ctx, sqlListTasks)
+	query := sqlSelectTasks
+	args := []any{}
+
+	if filter.Completed != nil {
+		query += `
+	WHERE completed = ?	
+	`
+		args = append(args, *filter.Completed)
+	}
+
+	query += sqlOrderTasks
+
+	rows, err := r.db.QueryContext(
+		ctx,
+		query,
+		args...,
+	)
 	if err != nil {
 		return nil, err
 	}

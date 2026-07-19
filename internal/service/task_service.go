@@ -59,8 +59,9 @@ func (s *TaskService) CreateTask(
 // ----------------------------------------------
 func (s *TaskService) ListTasks(
 	ctx context.Context,
+	filter models.TaskFilter,
 ) ([]models.Task, error) {
-	return s.repo.List(ctx)
+	return s.repo.List(ctx, filter)
 }
 
 // ----------------------------------------------
@@ -153,7 +154,7 @@ func (s *TaskService) UpdateTask(
 	}
 
 	oldTitle := task.Title
-	
+
 	if oldTitle == title {
 		return nil
 	}

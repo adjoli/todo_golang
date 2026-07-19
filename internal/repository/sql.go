@@ -19,16 +19,6 @@ FROM tasks
 WHERE id = ?;
 `
 
-const sqlListTasks = `
-SELECT
-	id,
-	title,
-	completed,
-	created_at
-FROM tasks
-ORDER BY id;
-`
-
 const sqlUpdateTask = `
 UPDATE tasks
 SET

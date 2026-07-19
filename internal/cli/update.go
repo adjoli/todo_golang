@@ -32,7 +32,7 @@ func (c *CLI) runUpdate(
 
 	if err := c.app.TaskService().UpdateTask(
 		context.Background(),
-		id, 
+		id,
 		args[1],
 	); err != nil {
 		return handleError(cmd, err)

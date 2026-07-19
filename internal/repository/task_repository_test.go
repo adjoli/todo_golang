@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"testing"
+
+	"github.com/adjoli/todo_chatgpt/internal/models"
 )
 
+// ----------------------------------------------
 func TestCreate(t *testing.T) {
 	repo := newTestRepository(t)
 
@@ -22,6 +25,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
+// ----------------------------------------------
 func TestFindByID(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()
@@ -57,7 +61,8 @@ func TestFindByID(t *testing.T) {
 	}
 }
 
-func TestList(t *testing.T) {
+// ----------------------------------------------
+func TestList_AllTasks(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()
 
@@ -77,7 +82,7 @@ func TestList(t *testing.T) {
 	}
 
 	// Act
-	tasks, err := repo.List(ctx)
+	tasks, err := repo.List(ctx, models.TaskFilter{})
 	// Assert
 	if err != nil {
 		t.Fatalf("List() returned error: %v", err)
@@ -96,6 +101,93 @@ func TestList(t *testing.T) {
 	}
 }
 
+// ----------------------------------------------
+func TestList_OnlyPendingTasks(t *testing.T) {
+	repo := newTestRepository(t)
+	ctx := context.Background()
+	myTasks := make([]*models.Task, 3)
+
+	// Arrange
+	myTasks[0] = newTestTask()
+	myTasks[0].Title = "Primeira tarefa"
+
+	myTasks[1] = newTestTask()
+	myTasks[1].Title = "Segunda tarefa"
+	myTasks[1].Completed = true
+
+	myTasks[2] = newTestTask()
+	myTasks[2].Title = "Terceira tarefa"
+
+	for i, task := range myTasks {
+		if err := repo.Create(ctx, task); err != nil {
+			t.Fatalf("#%d: Create() returned error: %v", i, err)
+		}
+	}
+
+	completed := false
+
+	// Act
+	tasks, err := repo.List(ctx, models.TaskFilter{Completed: &completed})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Assert
+	if len(tasks) != 2 {
+		t.Fatalf("expected 2 tasks, got %d", len(tasks))
+	}
+
+	for _, task := range tasks {
+		if task.Completed {
+			t.Fatalf("expected only pending tasks")
+		}
+	}
+}
+
+// ----------------------------------------------
+func TestList_OnlyCompleted(t *testing.T) {
+	repo := newTestRepository(t)
+	ctx := context.Background()
+	myTasks := make([]*models.Task, 3)
+
+	// Arrange
+	myTasks[0] = newTestTask()
+	myTasks[0].Title = "Primeira tarefa"
+
+	myTasks[1] = newTestTask()
+	myTasks[1].Title = "Segunda tarefa"
+	myTasks[1].Completed = true
+
+	myTasks[2] = newTestTask()
+	myTasks[2].Title = "Terceira tarefa"
+
+	for i, task := range myTasks {
+		if err := repo.Create(ctx, task); err != nil {
+			t.Fatalf("#%d: Create() returned error: %v", i, err)
+		}
+	}
+
+	completed := true
+
+	// Act
+	tasks, err := repo.List(ctx, models.TaskFilter{Completed: &completed})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// Assert
+	if len(tasks) != 1 {
+		t.Fatalf("expected 2 tasks, got %d", len(tasks))
+	}
+
+	for _, task := range tasks {
+		if !task.Completed {
+			t.Fatalf("expected only completed tasks")
+		}
+	}
+}
+
+// ----------------------------------------------
 func TestUpdate(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()
@@ -130,6 +222,7 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
+// ----------------------------------------------
 func TestDelete(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()

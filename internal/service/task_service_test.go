@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+
+	"github.com/adjoli/todo_chatgpt/internal/models"
 )
 
 // ----------------------------------------------
@@ -104,7 +106,7 @@ func TestListTasks(t *testing.T) {
 				}
 			}
 
-			tasks, err := service.ListTasks(ctx)
+			tasks, err := service.ListTasks(ctx, models.TaskFilter{})
 			if err != nil {
 				t.Fatalf("ListTasks(): %v", err)
 			}
@@ -134,7 +136,7 @@ func TestCompleteTask(t *testing.T) {
 		t.Fatalf("CompleteTask(): %v", err)
 	}
 
-	tasks, err := service.ListTasks(ctx)
+	tasks, err := service.ListTasks(ctx, models.TaskFilter{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -193,7 +195,7 @@ func TestDeleteTask(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	tasks, err := service.ListTasks(ctx)
+	tasks, err := service.ListTasks(ctx, models.TaskFilter{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -235,7 +237,7 @@ func TestUpdateTask(t *testing.T) {
 		t.Fatalf("UpdateTask(): %v", err)
 	}
 
-	tasks, err := service.ListTasks(ctx)
+	tasks, err := service.ListTasks(ctx, models.TaskFilter{})
 	if err != nil {
 		t.Fatal(err)
 	}

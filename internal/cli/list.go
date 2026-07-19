@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/adjoli/todo_chatgpt/internal/models"
 	"github.com/spf13/cobra"
 )
 
@@ -22,6 +23,7 @@ func (c *CLI) runList(
 ) error {
 	tasks, err := c.app.TaskService().ListTasks(
 		context.Background(),
+		models.TaskFilter{},
 	)
 	if err != nil {
 		return err
