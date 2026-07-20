@@ -65,6 +65,26 @@ func (s *TaskService) ListTasks(
 }
 
 // ----------------------------------------------
+func (s *TaskService) GetTask(
+	ctx context.Context,
+	id int64,
+) (models.Task, error) {
+	task, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		err = mapRepositoryError(err)
+		if errors.Is(err, ErrTaskNotFound) {
+			s.logger.Warn(
+				"task not found",
+				slog.Int64("id", id),
+			)
+		}
+		return models.Task{}, err
+	}
+
+	return *task, nil
+}
+
+// ----------------------------------------------
 func (s *TaskService) CompleteTask(
 	ctx context.Context,
 	id int64,

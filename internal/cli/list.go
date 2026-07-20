@@ -14,7 +14,7 @@ func (c *CLI) newListCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List tasks",
-		RunE:  func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			return c.runList(cmd, args, all)
 
 		},

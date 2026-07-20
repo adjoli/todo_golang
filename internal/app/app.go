@@ -34,6 +34,10 @@ func (a *App) Config() *config.Config {
 	return a.cfg
 }
 
+func (a *App) Logger() *slog.Logger {
+	return a.logger
+}
+
 func New() (*App, error) {
 	cfg, err := config.New()
 	if err != nil {
@@ -50,7 +54,9 @@ func New() (*App, error) {
 	service := service.New(repo, logger)
 
 	return &App{
+		cfg:         cfg,
 		db:          db,
+		logger:      logger,
 		taskService: service,
 	}, nil
 }

@@ -4,6 +4,8 @@
 *.so
 *.dylib
 
+*.http
+
 # Banco de dados
 data/tasks.db
 
