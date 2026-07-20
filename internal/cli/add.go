@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 
+	"github.com/adjoli/todo_chatgpt/internal/service"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +23,9 @@ func (c *CLI) runAdd(
 ) error {
 	task, err := c.app.TaskService().CreateTask(
 		context.Background(),
-		args[0],
+		service.CreateTaskInput{
+			Title: args[0],
+		},
 	)
 	if err != nil {
 		return handleError(cmd, err)

@@ -65,7 +65,9 @@ func (s *Server) createTask(
 
 	task, err := s.taskService.CreateTask(
 		r.Context(),
-		req.Title,
+		service.CreateTaskInput{
+			Title: req.Title,
+		},
 	)
 	if err != nil {
 		s.logger.Error("create task", "error", err)

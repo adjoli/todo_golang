@@ -31,9 +31,9 @@ func New(
 // ----------------------------------------------
 func (s *TaskService) CreateTask(
 	ctx context.Context,
-	title string,
+	input CreateTaskInput,
 ) (*models.Task, error) {
-	title, err := validateTitle(title)
+	title, err := validateTitle(input.Title)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (s *TaskService) DeleteTask(
 func (s *TaskService) UpdateTask(
 	ctx context.Context,
 	id int64,
-	title string,
+	input UpdateTaskInput,
 ) error {
 	task, err := s.repo.FindByID(ctx, id)
 	if err != nil {
@@ -168,7 +168,7 @@ func (s *TaskService) UpdateTask(
 		return err
 	}
 
-	title, err = validateTitle(title)
+	title, err := validateTitle(input.Title)
 	if err != nil {
 		return err
 	}

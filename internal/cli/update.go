@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/adjoli/todo_chatgpt/internal/service"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +34,9 @@ func (c *CLI) runUpdate(
 	if err := c.app.TaskService().UpdateTask(
 		context.Background(),
 		id,
-		args[1],
+		service.UpdateTaskInput{
+			Title: args[1],
+		},
 	); err != nil {
 		return handleError(cmd, err)
 	}
