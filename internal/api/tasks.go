@@ -146,3 +146,63 @@ func (s *Server) getTask(
 		resp,
 	)
 }
+
+// ----------------------------------------------
+func (s *Server) updateTask(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	id := r.PathValue("id")
+
+	taskID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid task id",
+		)
+		return
+	}
+
+	var req UpdateTaskRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(
+			w,
+			http.StatusBadRequest,
+			"invalid request body",
+		)
+		return
+	}
+
+	input := service.UpdateTaskInput{
+		Title: req.Title,
+	}
+
+	if err = s.taskService.UpdateTask(
+		r.Context(),
+		taskID,
+		input,
+	); err != nil {
+		if errors.Is(err, service.ErrTaskNotFound) {
+			writeError(
+				w,
+				http.StatusNotFound,
+				"task not found",
+			)
+			return
+		}
+
+		s.logger.Error("update task", "error", err)
+
+		writeError(
+			w,
+			http.StatusInternalServerError,
+			"internal server error",
+		)
+
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
