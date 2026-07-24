@@ -38,7 +38,9 @@ func TestCreateTask(t *testing.T) {
 
 			task, err := service.CreateTask(
 				context.Background(),
-				tt.title,
+				CreateTaskInput{
+					Title: tt.title,
+				},
 			)
 
 			if !errors.Is(err, tt.wantError) {
@@ -100,7 +102,10 @@ func TestListTasks(t *testing.T) {
 			ctx := context.Background()
 
 			for _, title := range tt.tasks {
-				_, err := service.CreateTask(ctx, title)
+				_, err := service.CreateTask(
+					ctx, 
+					CreateTaskInput{Title: title},
+				)
 				if err != nil {
 					t.Fatalf("CreateTask(): %v", err)
 				}
@@ -127,7 +132,12 @@ func TestCompleteTask(t *testing.T) {
 	service := newTestService(t)
 	ctx := context.Background()
 
-	task, err := service.CreateTask(ctx, "Estudar Go")
+	task, err := service.CreateTask(
+		ctx, 
+		CreateTaskInput{
+			Title: "Estudar Go",
+		},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -170,7 +180,9 @@ func TestCompleteTask_AlreadyCompleted(t *testing.T) {
 
 	task, _ := service.CreateTask(
 		ctx,
-		"Estudar Go",
+		CreateTaskInput{
+			Title: "Estudar Go",
+		},
 	)
 
 	if err := service.CompleteTask(ctx, task.ID); err != nil {
@@ -189,7 +201,12 @@ func TestDeleteTask(t *testing.T) {
 	service := newTestService(t)
 	ctx := context.Background()
 
-	task, _ := service.CreateTask(ctx, "Estudar Go")
+	task, _ := service.CreateTask(
+		ctx, 
+		CreateTaskInput{
+			Title: "Estudar Go",
+		},
+	)
 
 	if err := service.DeleteTask(ctx, task.ID); err != nil {
 		t.Fatal(err)
@@ -224,7 +241,11 @@ func TestUpdateTask(t *testing.T) {
 	service := newTestService(t)
 	ctx := context.Background()
 
-	task, err := service.CreateTask(ctx, "Estudar Go")
+	task, err := service.CreateTask(
+		ctx, CreateTaskInput{
+			Title: "Estudar Go",
+		},
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -232,7 +253,9 @@ func TestUpdateTask(t *testing.T) {
 	if err := service.UpdateTask(
 		ctx,
 		task.ID,
-		"Estudar Go profundamente",
+		UpdateTaskInput{
+			Title: "Estudar Go profundamente",
+		},
 	); err != nil {
 		t.Fatalf("UpdateTask(): %v", err)
 	}
