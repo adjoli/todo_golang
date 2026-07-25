@@ -1,3 +1,5 @@
+// Taskmanager-api é o binário do servidor HTTP que expõe a API
+// REST para gerenciamento de tarefas.
 package main
 
 import (

@@ -1,3 +1,5 @@
+// Taskmanager é o binário da interface de linha de comando (CLI)
+// para gerenciamento de tarefas.
 package main
 
 import (
