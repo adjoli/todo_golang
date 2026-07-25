@@ -1,6 +1,6 @@
 # Task Manager
 
-A command-line Task Manager written in Go.
+A Task Manager written in Go, available as both a CLI and an HTTP API.
 
 This project was created as a practical study of the Go language and its ecosystem. Rather than focusing only on implementing a CRUD application, the project explores idiomatic Go, software architecture, testing, and engineering best practices through incremental development.
 
@@ -10,14 +10,13 @@ Every commit represents a complete learning milestone.
 
 # Features
 
-Current features:
-
-* Create tasks
-* List tasks
+* Create, list, update, and remove tasks
 * Mark tasks as completed
-* Remove tasks
-* SQLite persistence
+* SQLite persistence (pure Go, no CGO required)
 * Command-line interface (Cobra)
+* HTTP API (stdlib `net/http`)
+* Structured logging (`log/slog`)
+* Configuration via environment variables
 * Automated tests
 * Layered architecture
 
@@ -26,9 +25,10 @@ Current features:
 # Technology Stack
 
 * Go
-* SQLite
-* Standard Library
+* SQLite (`modernc.org/sqlite`)
 * `database/sql`
+* `log/slog`
+* `net/http`
 * Cobra
 
 ---
@@ -39,11 +39,13 @@ Current features:
 task-manager/
 │
 ├── cmd/
-│   └── taskmanager/
-│       └── main.go
+│   ├── taskmanager/
+│   │   └── main.go              # CLI entrypoint
+│   └── taskmanager-api/
+│       └── main.go              # HTTP API entrypoint
 │
 ├── data/
-│   └── taskmanager.db
+│   └── tasks.db                 # SQLite database (gitignored)
 │
 ├── docs/
 │   ├── architecture.md
@@ -54,37 +56,56 @@ task-manager/
 │   └── roadmap.md
 │
 ├── internal/
-│   ├── app/
+│   ├── api/                     # HTTP handlers and routes
+│   │   ├── dto.go
+│   │   ├── response.go
+│   │   ├── routes.go
+│   │   ├── server.go
+│   │   └── tasks.go
+│   │
+│   ├── app/                     # Application bootstrap (composition root)
 │   │   └── app.go
 │   │
-│   ├── cli/
+│   ├── cli/                     # Cobra command definitions
 │   │   ├── add.go
 │   │   ├── done.go
 │   │   ├── errors.go
-│   │   ├── helpers.go
 │   │   ├── list.go
 │   │   ├── remove.go
-│   │   └── root.go
+│   │   ├── root.go
+│   │   └── update.go
 │   │
-│   ├── database/
+│   ├── config/                  # Config loading with env var support
 │   │   ├── config.go
-│   │   └── database.go
+│   │   ├── config_test.go
+│   │   ├── database.go
+│   │   └── environment.go
 │   │
-│   ├── models/
-│   │   └── task.go
+│   ├── database/                # DB connection and schema creation
+│   │   └── db.go
 │   │
-│   ├── repository/
+│   ├── logger/                  # Structured logger setup
+│   │   └── logger.go
+│   │
+│   ├── models/                  # Domain models
+│   │   ├── task.go
+│   │   └── task_filter.go
+│   │
+│   ├── repository/              # Persistence layer
 │   │   ├── sql.go
+│   │   ├── task_queries.go
 │   │   ├── task_repository.go
 │   │   ├── task_repository_test.go
 │   │   └── test_helpers.go
 │   │
-│   └── service/
+│   └── service/                 # Business logic layer
 │       ├── errors.go
+│       ├── inputs.go
 │       ├── task_service.go
 │       ├── task_service_test.go
 │       └── test_helpers.go
 │
+├── AGENTS.md
 ├── LICENSE
 ├── README.md
 ├── go.mod
@@ -96,24 +117,24 @@ task-manager/
 # Architecture
 
 ```text
-                 CLI
-                  │
-                  ▼
-             TaskService
-                  │
-                  ▼
-           TaskRepository
-                  │
-                  ▼
-            database/sql
-                  │
-                  ▼
-               SQLite
+         CLI / API
+              │
+              ▼
+         TaskService
+              │
+              ▼
+      TaskRepository
+              │
+              ▼
+        database/sql
+              │
+              ▼
+            SQLite
 ```
 
 Each layer has a single responsibility.
 
-* **CLI** receives user input.
+* **CLI / API** receive user input.
 * **Service** implements business rules.
 * **Repository** handles persistence.
 * **SQLite** stores application data.
@@ -133,7 +154,7 @@ This project follows several principles commonly adopted by the Go community.
 
 ---
 
-# Current Commands
+# CLI Commands
 
 ## Add a task
 
@@ -141,23 +162,29 @@ This project follows several principles commonly adopted by the Go community.
 taskmanager add "Study Go"
 ```
 
----
-
 ## List tasks
 
 ```bash
 taskmanager list
 ```
 
----
+## List all tasks (including completed)
+
+```bash
+taskmanager list --all
+```
+
+## Update a task
+
+```bash
+taskmanager update 1 "Study Go deeply"
+```
 
 ## Complete a task
 
 ```bash
 taskmanager done 1
 ```
-
----
 
 ## Remove a task
 
@@ -187,11 +214,27 @@ Enter the project directory:
 cd task-manager
 ```
 
-Run the application:
+## Run the CLI
 
 ```bash
 go run ./cmd/taskmanager
 ```
+
+## Run the HTTP API
+
+```bash
+go run ./cmd/taskmanager-api
+```
+
+The API listens on `:8080`. Available endpoints:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Health check |
+| GET | `/tasks` | List all tasks |
+| POST | `/tasks` | Create a task |
+| GET | `/tasks/{id}` | Get a task by ID |
+| PUT | `/tasks/{id}` | Update a task |
 
 ---
 
@@ -223,6 +266,18 @@ go fmt ./...
 
 ---
 
+# Configuration
+
+The database path can be overridden via environment variable:
+
+```bash
+export TASKMANAGER_DB="custom/path/tasks.db"
+```
+
+Default: `data/tasks.db`
+
+---
+
 # Learning Roadmap
 
 ## Completed
@@ -233,15 +288,16 @@ go fmt ./...
 * Automated tests
 * Service Layer
 * Command-Line Interface
+* Structured logging (`log/slog`)
+* Configuration management (env vars)
+* HTTP API (`net/http`)
 
 ## Planned
 
-* Structured logging
-* Configuration management
-* Environment variables
 * Docker
 * GitHub Actions
 * Release automation
+* Project review and final refactoring
 
 ---
 
@@ -262,7 +318,7 @@ Additional documentation is available in the `docs` directory.
 
 This repository has two primary goals.
 
-1. Build a complete command-line application in Go.
+1. Build a complete application in Go.
 2. Serve as a long-term reference for idiomatic Go development.
 
 The focus is not only on writing code, but also on understanding the reasoning behind architectural decisions, testing strategies, and software engineering practices.
