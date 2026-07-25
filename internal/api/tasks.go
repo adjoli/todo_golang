@@ -11,7 +11,8 @@ import (
 	"github.com/adjoli/todo_chatgpt/internal/service"
 )
 
-// ----------------------------------------------
+// listTasks é o handler da rota GET /tasks. Retorna todas as tarefas
+// em formato JSON.
 func (s *Server) listTasks(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -38,7 +39,8 @@ func (s *Server) listTasks(
 	}
 }
 
-// ----------------------------------------------
+// createTask é o handler da rota POST /tasks. Decodifica o payload
+// JSON, valida o título e cria uma nova tarefa.
 func (s *Server) createTask(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -94,7 +96,8 @@ func (s *Server) createTask(
 	}
 }
 
-// ----------------------------------------------
+// getTask é o handler da rota GET /tasks/{id}. Retorna a tarefa
+// correspondente ao ID ou 404 se não encontrada.
 func (s *Server) getTask(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -147,7 +150,8 @@ func (s *Server) getTask(
 	)
 }
 
-// ----------------------------------------------
+// updateTask é o handler da rota PUT /tasks/{id}. Atualiza o título
+// da tarefa ou retorna 404 se não encontrada.
 func (s *Server) updateTask(
 	w http.ResponseWriter,
 	r *http.Request,
