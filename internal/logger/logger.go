@@ -1,3 +1,5 @@
+// Package logger fornece o logger estruturado da aplicação,
+// utilizando log/slog com saída em texto para stderr.
 package logger
 
 import (
