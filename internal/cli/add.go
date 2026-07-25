@@ -3,7 +3,7 @@ package cli
 import (
 	"context"
 
-	"github.com/adjoli/todo_chatgpt/internal/service"
+	"github.com/adjoli/todo_golang/internal/service"
 	"github.com/spf13/cobra"
 )
 

@@ -35,7 +35,7 @@ go fmt ./...
 
 ## Key Facts
 
-- **Module**: `github.com/adjoli/todo_chatgpt`
+- **Module**: `github.com/adjoli/todo_golang`
 - **Go version**: 1.26.4
 - **SQLite driver**: `modernc.org/sqlite` (pure Go, no CGO required)
 - **Database path**: defaults to `data/tasks.db`, override with `TASKMANAGER_DB` env var

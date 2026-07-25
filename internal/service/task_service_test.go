@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/adjoli/todo_chatgpt/internal/models"
+	"github.com/adjoli/todo_golang/internal/models"
 )
 
 // ----------------------------------------------

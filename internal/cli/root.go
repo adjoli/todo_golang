@@ -3,7 +3,7 @@
 package cli
 
 import (
-	"github.com/adjoli/todo_chatgpt/internal/app"
+	"github.com/adjoli/todo_golang/internal/app"
 	"github.com/spf13/cobra"
 )
 

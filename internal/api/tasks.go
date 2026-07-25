@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/adjoli/todo_chatgpt/internal/models"
-	"github.com/adjoli/todo_chatgpt/internal/service"
+	"github.com/adjoli/todo_golang/internal/models"
+	"github.com/adjoli/todo_golang/internal/service"
 )
 
 // listTasks é o handler da rota GET /tasks. Retorna todas as tarefas

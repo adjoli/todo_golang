@@ -9,11 +9,11 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/adjoli/todo_chatgpt/internal/config"
-	"github.com/adjoli/todo_chatgpt/internal/database"
-	"github.com/adjoli/todo_chatgpt/internal/logger"
-	"github.com/adjoli/todo_chatgpt/internal/repository"
-	"github.com/adjoli/todo_chatgpt/internal/service"
+	"github.com/adjoli/todo_golang/internal/config"
+	"github.com/adjoli/todo_golang/internal/database"
+	"github.com/adjoli/todo_golang/internal/logger"
+	"github.com/adjoli/todo_golang/internal/repository"
+	"github.com/adjoli/todo_golang/internal/service"
 )
 
 // App é o container de dependências e lifecycle da aplicação.

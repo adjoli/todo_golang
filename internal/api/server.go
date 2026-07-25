@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/adjoli/todo_chatgpt/internal/app"
-	"github.com/adjoli/todo_chatgpt/internal/service"
+	"github.com/adjoli/todo_golang/internal/app"
+	"github.com/adjoli/todo_golang/internal/service"
 )
 
 // Server é o servidor HTTP da API de tarefas.

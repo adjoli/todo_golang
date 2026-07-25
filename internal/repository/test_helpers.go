@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/adjoli/todo_chatgpt/internal/database"
-	"github.com/adjoli/todo_chatgpt/internal/models"
+	"github.com/adjoli/todo_golang/internal/database"
+	"github.com/adjoli/todo_golang/internal/models"
 )
 
 func newTestRepository(t *testing.T) *TaskRepository {

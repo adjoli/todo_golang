@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/adjoli/todo_chatgpt/internal/models"
+	"github.com/adjoli/todo_golang/internal/models"
 	"github.com/spf13/cobra"
 )
 

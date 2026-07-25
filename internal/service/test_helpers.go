@@ -3,9 +3,9 @@ package service
 import (
 	"testing"
 
-	"github.com/adjoli/todo_chatgpt/internal/database"
-	"github.com/adjoli/todo_chatgpt/internal/logger"
-	"github.com/adjoli/todo_chatgpt/internal/repository"
+	"github.com/adjoli/todo_golang/internal/database"
+	"github.com/adjoli/todo_golang/internal/logger"
+	"github.com/adjoli/todo_golang/internal/repository"
 )
 
 func newTestService(t *testing.T) *TaskService {
