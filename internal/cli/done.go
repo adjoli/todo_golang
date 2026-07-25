@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// newDoneCommand cria o subcomando "done", que recebe um ID
+// como argumento positional e marca a tarefa como concluída.
 func (c *CLI) newDoneCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "done <id>",
@@ -18,6 +20,8 @@ func (c *CLI) newDoneCommand() *cobra.Command {
 	return cmd
 }
 
+// runDone executa a marcação de uma tarefa como concluída
+// pelo seu ID.
 func (c *CLI) runDone(
 	cmd *cobra.Command,
 	args []string,

@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// newUpdateCommand cria o subcomando "update", que recebe um ID
+// e um novo título como argumentos posicionais.
 func (c *CLI) newUpdateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update <id> <title>",
@@ -19,6 +21,8 @@ func (c *CLI) newUpdateCommand() *cobra.Command {
 	return cmd
 }
 
+// runUpdate atualiza o título de uma tarefa existente
+// identificada pelo ID.
 func (c *CLI) runUpdate(
 	cmd *cobra.Command,
 	args []string,

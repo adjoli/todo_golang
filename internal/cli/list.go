@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// newListCommand cria o subcomando "list" com a flag opcional
+// "--all", que inclui tarefas concluídas na listagem.
 func (c *CLI) newListCommand() *cobra.Command {
 	var all bool
 
@@ -30,6 +32,8 @@ func (c *CLI) newListCommand() *cobra.Command {
 	return cmd
 }
 
+// runList lista as tarefas filtradas por status. Por padrão,
+// exibe apenas tarefas pendentes; com a flag --all, exibe todas.
 func (c *CLI) runList(
 	cmd *cobra.Command,
 	args []string,
@@ -69,7 +73,8 @@ func (c *CLI) runList(
 	return nil
 }
 
-// ----------------------------------------------
+// statusLabel retorna o emoji correspondente ao status da tarefa:
+// 🟢 para concluída, 🔴 para pendente.
 func statusLabel(completed bool) string {
 	if completed {
 		return "🟢"

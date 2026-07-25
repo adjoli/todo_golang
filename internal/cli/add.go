@@ -7,6 +7,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// newAddCommand cria o subcomando "add", que recebe um título
+// como argumento positional e cria uma nova tarefa.
 func (c *CLI) newAddCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "add <title>",
@@ -17,6 +19,8 @@ func (c *CLI) newAddCommand() *cobra.Command {
 	return cmd
 }
 
+// runAdd executa a criação de uma tarefa a partir do título
+// informado no argumento positional.
 func (c *CLI) runAdd(
 	cmd *cobra.Command,
 	args []string,

@@ -8,6 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// newRemoveCommand cria o subcomando "remove" (alias "rm"),
+// que recebe um ID como argumento positional e remove a tarefa
+// permanentemente.
 func (c *CLI) newRemoveCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:     "remove <id>",
@@ -23,6 +26,7 @@ taskmanager rm 1`,
 	}
 }
 
+// runRemove remove permanentemente uma tarefa pelo seu ID.
 func (c *CLI) runRemove(
 	cmd *cobra.Command,
 	args []string,

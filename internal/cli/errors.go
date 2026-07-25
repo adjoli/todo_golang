@@ -8,6 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// handleError mapeia erros conhecidos do service para mensagens
+// amigáveis exibidas ao usuário. Erros inesperados são embrulhados
+// com contexto e retornados ao caller.
 func handleError(
 	cmd *cobra.Command,
 	err error,
