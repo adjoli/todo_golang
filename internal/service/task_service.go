@@ -1,3 +1,7 @@
+// Package service implementa as regras de negócio de gerenciamento
+// de tarefas. Ele orquestra operações entre a camada de interface
+// (CLI/API) e a camada de persistência (repository), validando
+// dados e traduzindo erros de infraestrutura em erros de domínio.
 package service
 
 import (
@@ -12,12 +16,15 @@ import (
 	"github.com/adjoli/todo_chatgpt/internal/repository"
 )
 
+// TaskService é o service que orquestra as operações de tarefas.
+// Ele valida regras de negócio, delega persistência ao repository
+// e registra eventos relevantes no logger.
 type TaskService struct {
 	repo   *repository.TaskRepository
 	logger *slog.Logger
 }
 
-// New creates a new TaskService
+// New cria um TaskService com o repository e o logger fornecidos.
 func New(
 	repo *repository.TaskRepository,
 	logger *slog.Logger,
@@ -28,7 +35,9 @@ func New(
 	}
 }
 
-// ----------------------------------------------
+// CreateTask valida o título, cria uma nova tarefa com status
+// pendente e a persiste no banco. Retorna a tarefa criada com
+// o ID populado.
 func (s *TaskService) CreateTask(
 	ctx context.Context,
 	input CreateTaskInput,
@@ -56,7 +65,8 @@ func (s *TaskService) CreateTask(
 	return task, nil
 }
 
-// ----------------------------------------------
+// ListTasks retorna todas as tarefas que atendem ao filtro informado,
+// delegando a consulta diretamente ao repository.
 func (s *TaskService) ListTasks(
 	ctx context.Context,
 	filter models.TaskFilter,
@@ -64,7 +74,8 @@ func (s *TaskService) ListTasks(
 	return s.repo.List(ctx, filter)
 }
 
-// ----------------------------------------------
+// GetTask busca uma tarefa pelo seu ID. Retorna ErrTaskNotFound
+// se a tarefa não existir.
 func (s *TaskService) GetTask(
 	ctx context.Context,
 	id int64,
@@ -84,7 +95,9 @@ func (s *TaskService) GetTask(
 	return *task, nil
 }
 
-// ----------------------------------------------
+// CompleteTask marca uma tarefa como concluída pelo seu ID.
+// Retorna ErrTaskNotFound se a tarefa não existir ou
+// ErrTaskAlreadyCompleted se já estiver concluída.
 func (s *TaskService) CompleteTask(
 	ctx context.Context,
 	id int64,
@@ -125,7 +138,8 @@ func (s *TaskService) CompleteTask(
 	return nil
 }
 
-// ----------------------------------------------
+// DeleteTask remove uma tarefa permanentemente pelo seu ID.
+// Retorna ErrTaskNotFound se a tarefa não existir.
 func (s *TaskService) DeleteTask(
 	ctx context.Context,
 	id int64,
@@ -150,7 +164,10 @@ func (s *TaskService) DeleteTask(
 	return nil
 }
 
-// ----------------------------------------------
+// UpdateTask atualiza o título de uma tarefa existente.
+// Retorna ErrTaskNotFound se a tarefa não existir ou ErrEmptyTitle
+// se o novo título for vazio. Se o título não mudar, a operação
+// é um no-op.
 func (s *TaskService) UpdateTask(
 	ctx context.Context,
 	id int64,
@@ -195,9 +212,9 @@ func (s *TaskService) UpdateTask(
 	return nil
 }
 
-// ----------------------------------------------
-// HELPER FUNCTIONS
-// ----------------------------------------------
+// mapRepositoryError converte erros de infraestrutura do repository
+// em erros de domínio do service. Atualmente, sql.ErrNoRows é
+// mapeado para ErrTaskNotFound.
 func mapRepositoryError(err error) error {
 	if errors.Is(err, sql.ErrNoRows) {
 		return ErrTaskNotFound
@@ -205,6 +222,9 @@ func mapRepositoryError(err error) error {
 	return err
 }
 
+// validateTitle remove espaços em branco das extremidades e valida
+// que o título não está vazio. Retorna ErrEmptyTitle se o resultado
+// for uma string vazia.
 func validateTitle(title string) (string, error) {
 	title = strings.TrimSpace(title)
 

@@ -103,7 +103,7 @@ func TestListTasks(t *testing.T) {
 
 			for _, title := range tt.tasks {
 				_, err := service.CreateTask(
-					ctx, 
+					ctx,
 					CreateTaskInput{Title: title},
 				)
 				if err != nil {
@@ -133,7 +133,7 @@ func TestCompleteTask(t *testing.T) {
 	ctx := context.Background()
 
 	task, err := service.CreateTask(
-		ctx, 
+		ctx,
 		CreateTaskInput{
 			Title: "Estudar Go",
 		},
@@ -202,7 +202,7 @@ func TestDeleteTask(t *testing.T) {
 	ctx := context.Background()
 
 	task, _ := service.CreateTask(
-		ctx, 
+		ctx,
 		CreateTaskInput{
 			Title: "Estudar Go",
 		},
