@@ -1,3 +1,6 @@
+// Package repository implementa a persistência de tarefas via
+// database/sql. Cada operação recebe context.Context para suportar
+// cancelamento e timeouts.
 package repository
 
 import (
@@ -7,17 +10,21 @@ import (
 	"github.com/adjoli/todo_chatgpt/internal/models"
 )
 
+// TaskRepository é o repositório de persistência de tarefas.
+// Ele encapsula as operações SQL e mapeia resultados para models.Task.
 type TaskRepository struct {
 	db *sql.DB
 }
 
+// New cria um novo TaskRepository com a conexão de banco fornecida.
 func New(db *sql.DB) *TaskRepository {
 	return &TaskRepository{
 		db: db,
 	}
 }
 
-// ----------------------------------------------
+// Create insere uma nova tarefa no banco e popula o campo ID
+// do objeto passado como referência.
 func (r *TaskRepository) Create(
 	ctx context.Context,
 	task *models.Task,
@@ -43,7 +50,8 @@ func (r *TaskRepository) Create(
 	return nil
 }
 
-// ----------------------------------------------
+// FindByID busca uma tarefa pelo seu ID.
+// Retorna sql.ErrNoRows se a tarefa não existir.
 func (r *TaskRepository) FindByID(
 	ctx context.Context,
 	id int64,
@@ -64,7 +72,8 @@ func (r *TaskRepository) FindByID(
 	return task, nil
 }
 
-// ----------------------------------------------
+// List retorna todas as tarefas que atendem ao filtro informado.
+// O resultado é ordenado por ID crescente.
 func (r *TaskRepository) List(
 	ctx context.Context,
 	filter models.TaskFilter,
@@ -115,7 +124,8 @@ func (r *TaskRepository) List(
 	return tasks, nil
 }
 
-// ----------------------------------------------
+// Update atualiza o título e o status de uma tarefa existente.
+// Retorna sql.ErrNoRows se o ID não existir no banco.
 func (r *TaskRepository) Update(
 	ctx context.Context,
 	task *models.Task,
@@ -143,7 +153,8 @@ func (r *TaskRepository) Update(
 	return nil
 }
 
-// ----------------------------------------------
+// Delete remove uma tarefa pelo seu ID.
+// Retorna sql.ErrNoRows se o ID não existir no banco.
 func (r *TaskRepository) Delete(
 	ctx context.Context,
 	id int64,
