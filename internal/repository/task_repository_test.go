@@ -9,7 +9,8 @@ import (
 	"github.com/adjoli/todo_golang/internal/models"
 )
 
-// ----------------------------------------------
+// TestCreate verifica que Create insere uma tarefa no banco
+// e popula o campo ID do objeto.
 func TestCreate(t *testing.T) {
 	repo := newTestRepository(t)
 
@@ -25,7 +26,8 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestFindByID verifica que FindByID retorna a tarefa correta
+// com todos os campos populados.
 func TestFindByID(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()
@@ -61,7 +63,8 @@ func TestFindByID(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestList_AllTasks verifica que List retorna todas as tarefas
+// quando nenhum filtro é aplicado.
 func TestList_AllTasks(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()
@@ -101,7 +104,8 @@ func TestList_AllTasks(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestList_OnlyPendingTasks verifica que List retorna apenas tarefas
+// pendentes quando o filtro Completed é false.
 func TestList_OnlyPendingTasks(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()
@@ -144,7 +148,8 @@ func TestList_OnlyPendingTasks(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestList_OnlyCompleted verifica que List retorna apenas tarefas
+// concluídas quando o filtro Completed é true.
 func TestList_OnlyCompleted(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()
@@ -187,7 +192,8 @@ func TestList_OnlyCompleted(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestUpdate verifica que Update altera o título e o status
+// de uma tarefa existente.
 func TestUpdate(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()
@@ -222,7 +228,8 @@ func TestUpdate(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestDelete verifica que Delete remove a tarefa e que
+// FindByID retorna sql.ErrNoRows após a remoção.
 func TestDelete(t *testing.T) {
 	repo := newTestRepository(t)
 	ctx := context.Background()

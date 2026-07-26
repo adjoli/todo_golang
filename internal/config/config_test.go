@@ -6,6 +6,9 @@ import (
 	"testing"
 )
 
+// TestNew valida o comportamento de New em três cenários:
+// configuração padrão, sobrescrita via variável de ambiente
+// e erro quando o path do banco é vazio.
 func TestNew(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -26,7 +29,7 @@ func TestNew(t *testing.T) {
 			wantError: false,
 		},
 		{
-			name:      "returns erro fro empty database path",
+			name:      "returns error for empty database path",
 			envSet:    true,
 			envValue:  "",
 			wantError: true,
@@ -58,6 +61,8 @@ func TestNew(t *testing.T) {
 	}
 }
 
+// TestNew_CreatesDatabaseDirectory verifica que New cria o diretório
+// pai do caminho do banco de dados automaticamente.
 func TestNew_CreatesDatabaseDirectory(t *testing.T) {
 	root := t.TempDir()
 
