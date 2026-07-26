@@ -8,7 +8,8 @@ import (
 	"github.com/adjoli/todo_chatgpt/internal/models"
 )
 
-// ----------------------------------------------
+// TestCreateTask valida o comportamento de CreateTask em três cenários:
+// título válido, título vazio e título com apenas espaços.
 func TestCreateTask(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -74,7 +75,8 @@ func TestCreateTask(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestListTasks valida que ListTasks retorna a quantidade correta
+// de tarefas, cobrindo lista vazia e lista com duas tarefas.
 func TestListTasks(t *testing.T) {
 	tests := []struct {
 		name  string
@@ -127,7 +129,8 @@ func TestListTasks(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestCompleteTask verifica que CompleteTask marca a tarefa
+// como concluída.
 func TestCompleteTask(t *testing.T) {
 	service := newTestService(t)
 	ctx := context.Background()
@@ -156,7 +159,8 @@ func TestCompleteTask(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestCompleteTask_NotFound verifica que CompleteTask retorna
+// ErrTaskNotFound quando o ID não existe.
 func TestCompleteTask_NotFound(t *testing.T) {
 	service := newTestService(t)
 
@@ -173,7 +177,8 @@ func TestCompleteTask_NotFound(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestCompleteTask_AlreadyCompleted verifica que CompleteTask retorna
+// ErrTaskAlreadyCompleted quando a tarefa já está concluída.
 func TestCompleteTask_AlreadyCompleted(t *testing.T) {
 	service := newTestService(t)
 	ctx := context.Background()
@@ -196,7 +201,8 @@ func TestCompleteTask_AlreadyCompleted(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestDeleteTask verifica que DeleteTask remove a tarefa e que
+// a lista fica vazia após a remoção.
 func TestDeleteTask(t *testing.T) {
 	service := newTestService(t)
 	ctx := context.Background()
@@ -222,7 +228,8 @@ func TestDeleteTask(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestDeleteTask_NotFound verifica que DeleteTask retorna
+// ErrTaskNotFound quando o ID não existe.
 func TestDeleteTask_NotFound(t *testing.T) {
 	service := newTestService(t)
 
@@ -236,7 +243,8 @@ func TestDeleteTask_NotFound(t *testing.T) {
 	}
 }
 
-// ----------------------------------------------
+// TestUpdateTask verifica que UpdateTask altera o título
+// de uma tarefa existente.
 func TestUpdateTask(t *testing.T) {
 	service := newTestService(t)
 	ctx := context.Background()
