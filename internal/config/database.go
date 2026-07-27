@@ -6,10 +6,14 @@ import (
 )
 
 // prepareDatabasePath cria o diretório pai do caminho do banco de dados
-// caso não exista. Se o caminho não contém diretório (ex: "tasks.db"),
-// a função é uma operação no-op.
+// caso não exista. A operação é um no-op para drivers que não utilizam
+// arquivos (ex: Postgres).
 func prepareDatabasePath(cfg *Config) error {
-	dir := filepath.Dir(cfg.Database.Path)
+	if cfg.Database.Driver != "sqlite" {
+		return nil
+	}
+
+	dir := filepath.Dir(cfg.Database.DSN)
 
 	if dir == "." {
 		return nil

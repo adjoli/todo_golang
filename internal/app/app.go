@@ -61,19 +61,25 @@ func New() (*App, error) {
 		return nil, fmt.Errorf("initialize application: %w", err)
 	}
 
-	db, err := database.New(cfg.Database.Path)
+	db, err := database.New(cfg.Database.Driver, cfg.Database.DSN)
 	if err != nil {
 		return nil, fmt.Errorf("initialize application: %w", err)
 	}
 
+	d, err := repository.NewDialect(cfg.Database.Driver)
+	if err != nil {
+		db.Close()
+		return nil, fmt.Errorf("initialize application: %w", err)
+	}
+
 	logger := logger.New()
-	repo := repository.New(db)
-	service := service.New(repo, logger)
+	repo := repository.New(db, d)
+	svc := service.New(repo, logger)
 
 	return &App{
 		cfg:         cfg,
 		db:          db,
 		logger:      logger,
-		taskService: service,
+		taskService: svc,
 	}, nil
 }

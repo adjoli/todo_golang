@@ -42,33 +42,39 @@ Command-Line Interface
 
 ---
 
-# Planned
-
-## Commit 07
+## ✅ Commit 07
 
 Structured logging (`log/slog`)
 
-Goals:
+---
 
-* configure application logger;
-* log important events;
-* prepare for configurable log levels.
+## ✅ Commit 08
+
+Configuration (environment variables)
 
 ---
 
-## Commit 08
+## ✅ Commit 09
 
-Configuration
-
-Goals:
-
-* centralize configuration;
-* support environment variables;
-* remove hardcoded values.
+HTTP API (`net/http`)
 
 ---
 
-## Commit 09
+## ✅ Commit 10
+
+Postgres support (`pgx`)
+
+---
+
+## ✅ Commit 11
+
+`.env` file support (`godotenv`)
+
+---
+
+# Planned
+
+## Commit 12
 
 Docker
 
@@ -80,7 +86,7 @@ Goals:
 
 ---
 
-## Commit 10
+## Commit 13
 
 GitHub Actions
 
@@ -92,7 +98,7 @@ Goals:
 
 ---
 
-## Commit 11
+## Commit 14
 
 Release
 
@@ -104,7 +110,7 @@ Goals:
 
 ---
 
-## Commit 12
+## Commit 15
 
 Project Review
 
@@ -121,10 +127,8 @@ Goals:
 
 Possible extensions after the tutorial:
 
-* REST API
 * Web interface
 * TUI (Bubble Tea)
-* Multiple databases
 * Import/Export
 * Search
 * Task categories
