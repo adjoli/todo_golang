@@ -11,7 +11,7 @@ import (
 func newTestRepository(t *testing.T) *TaskRepository {
 	t.Helper()
 
-	db, err := database.New(":memory:")
+	db, err := database.New("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("opening database: %v", err)
 	}
@@ -22,7 +22,9 @@ func newTestRepository(t *testing.T) *TaskRepository {
 		}
 	})
 
-	return New(db)
+	d, _ := NewDialect("sqlite")
+
+	return New(db, d)
 }
 
 func newTestTask() *models.Task {

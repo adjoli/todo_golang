@@ -12,7 +12,7 @@ Every commit represents a complete learning milestone.
 
 * Create, list, update, and remove tasks
 * Mark tasks as completed
-* SQLite persistence (pure Go, no CGO required)
+* SQLite and Postgres persistence
 * Command-line interface (Cobra)
 * HTTP API (stdlib `net/http`)
 * Structured logging (`log/slog`)
@@ -26,6 +26,7 @@ Every commit represents a complete learning milestone.
 
 * Go
 * SQLite (`modernc.org/sqlite`)
+* Postgres (`pgx`)
 * `database/sql`
 * `log/slog`
 * `net/http`
@@ -92,8 +93,8 @@ task-manager/
 │   │   └── task_filter.go
 │   │
 │   ├── repository/              # Persistence layer
+│   │   ├── dialect.go
 │   │   ├── sql.go
-│   │   ├── task_queries.go
 │   │   ├── task_repository.go
 │   │   ├── task_repository_test.go
 │   │   └── test_helpers.go
@@ -129,7 +130,7 @@ task-manager/
         database/sql
               │
               ▼
-            SQLite
+       SQLite / Postgres
 ```
 
 Each layer has a single responsibility.
@@ -137,7 +138,7 @@ Each layer has a single responsibility.
 * **CLI / API** receive user input.
 * **Service** implements business rules.
 * **Repository** handles persistence.
-* **SQLite** stores application data.
+* **SQLite / Postgres** stores application data.
 
 ---
 
@@ -205,13 +206,7 @@ taskmanager rm 1
 Clone the repository:
 
 ```bash
-git clone <repository-url>
-```
-
-Enter the project directory:
-
-```bash
-cd task-manager
+git clone https://github.com/adjoli/todo_golang.git
 ```
 
 ## Run the CLI
@@ -268,13 +263,54 @@ go fmt ./...
 
 # Configuration
 
-The database path can be overridden via environment variable:
+The database driver and connection can be configured via environment variables:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `TASKMANAGER_DB_DRIVER` | Database driver (`"sqlite"` or `"postgres"`) | `"sqlite"` |
+| `TASKMANAGER_DB_DSN` | Connection string (file path for SQLite, DSN for Postgres) | `data/tasks.db` |
+| `TASKMANAGER_DB` | Legacy alias for `TASKMANAGER_DB_DSN` | — |
+
+## Using a .env file
+
+The application automatically loads a `.env` file from the working directory if one exists. Copy `.env.example` to get started:
 
 ```bash
-export TASKMANAGER_DB="custom/path/tasks.db"
+cp .env.example .env
 ```
 
-Default: `data/tasks.db`
+Edit the file with your settings:
+
+```env
+TASKMANAGER_DB_DRIVER=sqlite
+TASKMANAGER_DB_DSN=data/tasks.db
+```
+
+Real environment variables always override `.env` values.
+
+> **Note:** `.env` is gitignored — never commit secrets.
+
+## SQLite (default)
+
+```bash
+# Zero config — just run it
+go run ./cmd/taskmanager
+```
+
+## Postgres
+
+```bash
+export TASKMANAGER_DB_DRIVER=postgres
+export TASKMANAGER_DB_DSN="postgres://user:pass@localhost:5432/taskdb?sslmode=disable"
+go run ./cmd/taskmanager
+```
+
+Or via `.env`:
+
+```env
+TASKMANAGER_DB_DRIVER=postgres
+TASKMANAGER_DB_DSN=postgres://user:pass@localhost:5432/taskdb?sslmode=disable
+```
 
 ---
 
@@ -291,6 +327,7 @@ Default: `data/tasks.db`
 * Structured logging (`log/slog`)
 * Configuration management (env vars)
 * HTTP API (`net/http`)
+* Postgres support (`pgx`)
 
 ## Planned
 

@@ -9,6 +9,9 @@
 # Banco de dados
 data/tasks.db
 
+# Environment
+.env
+
 # IDE
 .vscode/
 .idea/

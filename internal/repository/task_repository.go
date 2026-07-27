@@ -6,6 +6,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/adjoli/todo_chatgpt/internal/models"
 )
@@ -13,13 +14,18 @@ import (
 // TaskRepository é o repositório de persistência de tarefas.
 // Ele encapsula as operações SQL e mapeia resultados para models.Task.
 type TaskRepository struct {
-	db *sql.DB
+	db      *sql.DB
+	dialect dialect
+	queries *queries
 }
 
-// New cria um novo TaskRepository com a conexão de banco fornecida.
-func New(db *sql.DB) *TaskRepository {
+// New cria um novo TaskRepository com a conexão de banco e o dialect
+// fornecidos.
+func New(db *sql.DB, d dialect) *TaskRepository {
 	return &TaskRepository{
-		db: db,
+		db:      db,
+		dialect: d,
+		queries: newQueries(d),
 	}
 }
 
@@ -29,9 +35,21 @@ func (r *TaskRepository) Create(
 	ctx context.Context,
 	task *models.Task,
 ) error {
+	if r.dialect.supportsLastInsertID() {
+		return r.createWithLastInsertID(ctx, task)
+	}
+	return r.createWithReturning(ctx, task)
+}
+
+// createWithLastInsertID insere a tarefa usando result.LastInsertId()
+// (suportado por SQLite).
+func (r *TaskRepository) createWithLastInsertID(
+	ctx context.Context,
+	task *models.Task,
+) error {
 	result, err := r.db.ExecContext(
 		ctx,
-		sqlInsertTask,
+		r.queries.insertTask(),
 		task.Title,
 		task.Completed,
 		task.CreatedAt,
@@ -50,13 +68,37 @@ func (r *TaskRepository) Create(
 	return nil
 }
 
+// createWithReturning insere a tarefa usando RETURNING id
+// (necessário para Postgres).
+func (r *TaskRepository) createWithReturning(
+	ctx context.Context,
+	task *models.Task,
+) error {
+	row := r.db.QueryRowContext(
+		ctx,
+		r.queries.insertTaskReturningID(),
+		task.Title,
+		task.Completed,
+		task.CreatedAt,
+	)
+
+	var id int64
+	if err := row.Scan(&id); err != nil {
+		return fmt.Errorf("scan returning id: %w", err)
+	}
+
+	task.ID = id
+
+	return nil
+}
+
 // FindByID busca uma tarefa pelo seu ID.
 // Retorna sql.ErrNoRows se a tarefa não existir.
 func (r *TaskRepository) FindByID(
 	ctx context.Context,
 	id int64,
 ) (*models.Task, error) {
-	row := r.db.QueryRowContext(ctx, sqlFindTaskByID, id)
+	row := r.db.QueryRowContext(ctx, r.queries.findTaskByID(), id)
 
 	task := &models.Task{}
 
@@ -78,17 +120,15 @@ func (r *TaskRepository) List(
 	ctx context.Context,
 	filter models.TaskFilter,
 ) ([]models.Task, error) {
-	query := sqlSelectTasks
+	query := r.queries.selectTasks()
 	args := []any{}
 
 	if filter.Completed != nil {
-		query += `
-	WHERE completed = ?	
-	`
+		query += r.queries.filterByCompleted()
 		args = append(args, *filter.Completed)
 	}
 
-	query += sqlOrderTasks
+	query += r.queries.orderTasks()
 
 	rows, err := r.db.QueryContext(
 		ctx,
@@ -132,7 +172,7 @@ func (r *TaskRepository) Update(
 ) error {
 	result, err := r.db.ExecContext(
 		ctx,
-		sqlUpdateTask,
+		r.queries.updateTask(),
 		task.Title,
 		task.Completed,
 		task.ID,
@@ -159,7 +199,7 @@ func (r *TaskRepository) Delete(
 	ctx context.Context,
 	id int64,
 ) error {
-	result, err := r.db.ExecContext(ctx, sqlDeleteTask, id)
+	result, err := r.db.ExecContext(ctx, r.queries.deleteTask(), id)
 	if err != nil {
 		return err
 	}

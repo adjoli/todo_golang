@@ -130,3 +130,49 @@ Only introduce abstractions after a concrete need arises.
 * Simpler code.
 * Less accidental complexity.
 * Easier maintenance.
+
+---
+
+# ADR-007
+
+## Multi-Driver Database Support
+
+### Context
+
+The application initially supported only SQLite. As the project evolved, the need to support Postgres arose — both for production use cases and to learn how Go applications handle multiple database drivers through `database/sql`.
+
+### Decision
+
+Introduce a `dialect` interface in the repository layer that abstracts SQL differences between SQLite and Postgres. Each driver provides its own implementation (`sqliteDialect`, `postgresDialect`), and the repository receives the appropriate dialect at construction time.
+
+Driver selection is done via environment variables (`TASKMANAGER_DB_DRIVER`, `TASKMANAGER_DB_DSN`), with SQLite remaining the default for backwards compatibility.
+
+Postgres uses the `pgx` driver, registered as `"postgres"` via `sql.Register` in an `init()` function.
+
+### Consequences
+
+* Repository code remains driver-agnostic — SQL differences are encapsulated in the dialect.
+* Adding a new driver requires only a new dialect implementation and schema branch.
+* `Create` operations branch internally: SQLite uses `LastInsertId()`, Postgres uses `RETURNING id`.
+* Tests continue to use in-memory SQLite — no external services required.
+
+---
+
+# ADR-008
+
+## .env File Support
+
+### Context
+
+Configuration is done via environment variables, but requiring users to `export` variables manually is inconvenient for local development. A `.env` file provides a zero-friction way to configure the application without polluting the shell environment.
+
+### Decision
+
+Load `.env` files automatically using `github.com/joho/godotenv` at the start of `config.New()`. If no `.env` file exists, the application continues normally.
+
+### Consequences
+
+* `loadEnvironment()` remains unchanged — it still reads from `os.LookupEnv`.
+* Real environment variables always override `.env` values.
+* `.env` is gitignored — secrets are never committed.
+* `.env.example` is tracked — documents expected variables for new developers.

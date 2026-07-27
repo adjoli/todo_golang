@@ -11,7 +11,7 @@ import (
 func newTestService(t *testing.T) *TaskService {
 	t.Helper()
 
-	db, err := database.New(":memory:")
+	db, err := database.New("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("opening database: %v", err)
 	}
@@ -20,8 +20,10 @@ func newTestService(t *testing.T) *TaskService {
 		_ = db.Close()
 	})
 
+	d, _ := repository.NewDialect("sqlite")
+
 	logger := logger.New()
-	repo := repository.New(db)
+	repo := repository.New(db, d)
 
 	return New(repo, logger)
 }
