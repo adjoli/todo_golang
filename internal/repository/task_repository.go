@@ -16,7 +16,7 @@ import (
 type TaskRepository struct {
 	db      *sql.DB
 	dialect dialect
-	queries *queries
+	builder *sqlBuilder
 }
 
 // New cria um novo TaskRepository com a conexão de banco e o dialect
@@ -25,7 +25,7 @@ func New(db *sql.DB, d dialect) *TaskRepository {
 	return &TaskRepository{
 		db:      db,
 		dialect: d,
-		queries: newQueries(d),
+		builder: newSQLBuilder(d),
 	}
 }
 
@@ -49,7 +49,7 @@ func (r *TaskRepository) createWithLastInsertID(
 ) error {
 	result, err := r.db.ExecContext(
 		ctx,
-		r.queries.insertTask(),
+		r.builder.insertTask(),
 		task.Title,
 		task.Completed,
 		task.CreatedAt,
@@ -76,7 +76,7 @@ func (r *TaskRepository) createWithReturning(
 ) error {
 	row := r.db.QueryRowContext(
 		ctx,
-		r.queries.insertTaskReturningID(),
+		r.builder.insertTaskReturningID(),
 		task.Title,
 		task.Completed,
 		task.CreatedAt,
@@ -98,7 +98,7 @@ func (r *TaskRepository) FindByID(
 	ctx context.Context,
 	id int64,
 ) (*models.Task, error) {
-	row := r.db.QueryRowContext(ctx, r.queries.findTaskByID(), id)
+	row := r.db.QueryRowContext(ctx, r.builder.findTaskByID(), id)
 
 	task := &models.Task{}
 
@@ -120,15 +120,15 @@ func (r *TaskRepository) List(
 	ctx context.Context,
 	filter models.TaskFilter,
 ) ([]models.Task, error) {
-	query := r.queries.selectTasks()
+	query := r.builder.selectTasks()
 	args := []any{}
 
 	if filter.Completed != nil {
-		query += r.queries.filterByCompleted()
+		query += r.builder.filterByCompleted()
 		args = append(args, *filter.Completed)
 	}
 
-	query += r.queries.orderTasks()
+	query += r.builder.orderTasks()
 
 	rows, err := r.db.QueryContext(
 		ctx,
@@ -172,7 +172,7 @@ func (r *TaskRepository) Update(
 ) error {
 	result, err := r.db.ExecContext(
 		ctx,
-		r.queries.updateTask(),
+		r.builder.updateTask(),
 		task.Title,
 		task.Completed,
 		task.ID,
@@ -199,7 +199,7 @@ func (r *TaskRepository) Delete(
 	ctx context.Context,
 	id int64,
 ) error {
-	result, err := r.db.ExecContext(ctx, r.queries.deleteTask(), id)
+	result, err := r.db.ExecContext(ctx, r.builder.deleteTask(), id)
 	if err != nil {
 		return err
 	}
