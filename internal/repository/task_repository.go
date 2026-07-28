@@ -8,7 +8,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/adjoli/todo_chatgpt/internal/models"
+	"github.com/adjoli/todo_golang/internal/models"
 )
 
 // TaskRepository é o repositório de persistência de tarefas.

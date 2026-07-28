@@ -5,8 +5,8 @@ package main
 import (
 	"log"
 
-	"github.com/adjoli/todo_chatgpt/internal/api"
-	"github.com/adjoli/todo_chatgpt/internal/app"
+	"github.com/adjoli/todo_golang/internal/api"
+	"github.com/adjoli/todo_golang/internal/app"
 )
 
 func main() {

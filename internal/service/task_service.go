@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/adjoli/todo_chatgpt/internal/models"
-	"github.com/adjoli/todo_chatgpt/internal/repository"
+	"github.com/adjoli/todo_golang/internal/models"
+	"github.com/adjoli/todo_golang/internal/repository"
 )
 
 // TaskService é o service que orquestra as operações de tarefas.
